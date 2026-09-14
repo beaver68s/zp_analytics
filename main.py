@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Zarplatnik Research — McKinsey-style storytelling dashboard.
+Salary Research — storytelling dashboard.
 План: Agenda → Executive Summary → главы с гипотезами → Implications.
 """
 
@@ -20,23 +20,28 @@ BIN_STEP = 20_000
 MIN_N = 15  # скрываем слишком тонкие срезы в исследовании
 FOCUS_ROLE = "data-analyst"  # роль для иллюстрации кривой грейдов
 
-# --- Visual system (cool slate + ink, not purple/cream AI defaults) ---
-INK = "#0B1F33"
-SLATE = "#334155"
-MUTED = "#64748B"
-LINE = "#E2E8F0"
-PAPER = "#F7F5F1"
+# --- Visual system: McKinsey hierarchy + Avito clarity ---
+INK = "#121212"          # почти чёрный — основной текст
+SLATE = "#2B2B2B"        # вторичный текст (всё ещё контрастный)
+MUTED = "#5C5C5C"        # подписи, не бледный grey-on-beige
+LINE = "#E6E6E6"
+PAPER = "#FFFFFF"
+SURFACE = "#F4F4F4"
 CARD = "#FFFFFF"
-ACCENT = "#0E7C66"
-ACCENT_SOFT = "#D8F3EC"
-WARN = "#B45309"
-DENY = "#B91C1C"
+ACCENT = "#005BFF"       # avito-like action blue
+ACCENT_SOFT = "#EAF1FF"
+NAVY = "#0A2540"         # mckinsey-like ink for titles
+OK = "#0A7A3F"
+WARN = "#9A6700"
+DENY = "#C62828"
 PLOTLY_LAYOUT = dict(
     paper_bgcolor="rgba(0,0,0,0)",
     plot_bgcolor="rgba(0,0,0,0)",
-    font=dict(family="DM Sans, sans-serif", color=SLATE, size=13),
-    margin=dict(l=16, r=16, t=48, b=16),
-    hoverlabel=dict(bgcolor="white", font_size=13),
+    font=dict(family="Manrope, Inter, sans-serif", color=INK, size=14),
+    margin=dict(l=8, r=8, t=40, b=8),
+    hoverlabel=dict(bgcolor="white", font_size=14, font_color=INK),
+    title=dict(font=dict(size=16, color=INK, family="Manrope, sans-serif")),
+    legend=dict(font=dict(size=13, color=SLATE)),
 )
 
 CHAPTERS = [
@@ -126,215 +131,352 @@ def inject_css() -> None:
     st.markdown(
         f"""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap');
 
-html, body, [class*="css"] {{
-  font-family: 'DM Sans', sans-serif;
-  color: {SLATE};
+/* ===== Base: high contrast, large type ===== */
+html, body, [data-testid="stAppViewContainer"], .stApp {{
+  font-family: 'Manrope', sans-serif !important;
+  color: {INK} !important;
+  background: {PAPER} !important;
+  font-size: 16px !important;
+  line-height: 1.55 !important;
 }}
 .stApp {{
-  background:
-    radial-gradient(1200px 600px at 10% -10%, #DCECE7 0%, transparent 55%),
-    radial-gradient(900px 500px at 100% 0%, #E8E4DC 0%, transparent 50%),
-    linear-gradient(180deg, {PAPER} 0%, #F0EEE9 100%);
+  background: {PAPER} !important;
 }}
-/* hide default streamlit chrome noise */
+[data-testid="stHeader"] {{
+  background: {PAPER} !important;
+  border-bottom: 1px solid {LINE};
+}}
 #MainMenu, footer {{ visibility: hidden; }}
-header {{ background: transparent !important; }}
+
+/* Main column width — readable report, not endless stretch */
+[data-testid="stMainBlockContainer"] {{
+  max-width: 1080px !important;
+  padding-top: 1.75rem !important;
+  padding-bottom: 3rem !important;
+  padding-left: 2rem !important;
+  padding-right: 2rem !important;
+}}
+
+/* Kill Streamlit's washed-out caption/markdown greys */
+[data-testid="stMarkdownContainer"] p,
+[data-testid="stMarkdownContainer"] li,
+[data-testid="stMarkdownContainer"] span,
+.stMarkdown, .stCaption {{
+  color: {INK} !important;
+}}
+[data-testid="stCaptionContainer"], .stCaption {{
+  color: {MUTED} !important;
+  font-size: 0.92rem !important;
+}}
+label, [data-testid="stWidgetLabel"] {{
+  color: {SLATE} !important;
+}}
+
+/* Tables */
+[data-testid="stDataFrame"] {{
+  border: 1px solid {LINE};
+  border-radius: 12px;
+  overflow: hidden;
+}}
+
+/* ===== Sidebar TOC (Avito clarity) ===== */
 [data-testid="stSidebar"] {{
-  background: linear-gradient(180deg, #0B1F33 0%, #14324A 100%);
-  border-right: none;
+  background: {SURFACE} !important;
+  border-right: 1px solid {LINE} !important;
 }}
-[data-testid="stSidebar"] * {{ color: #E8EEF4 !important; }}
-[data-testid="stSidebar"] .stSelectbox label,
-[data-testid="stSidebar"] .stMultiSelect label,
-[data-testid="stSidebar"] .stSlider label,
-[data-testid="stSidebar"] .stRadio label {{
-  color: #A8B8C8 !important;
-  font-size: 0.78rem !important;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+[data-testid="stSidebar"] > div:first-child {{
+  padding: 1.25rem 1rem 2rem 1rem;
 }}
-[data-testid="stSidebar"] [data-baseweb="select"] > div,
-[data-testid="stSidebar"] input {{
-  background: rgba(255,255,255,0.08) !important;
-  border-color: rgba(255,255,255,0.12) !important;
+[data-testid="stSidebar"] h3,
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p,
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] * {{
+  color: {INK} !important;
 }}
-div[data-testid="stVerticalBlock"] > div:has(> div.hero) {{
-  padding-top: 0.5rem;
+[data-testid="stSidebar"] h3 {{
+  font-family: 'Source Serif 4', Georgia, serif !important;
+  font-size: 1.35rem !important;
+  font-weight: 700 !important;
+  margin-bottom: 0.15rem !important;
 }}
+[data-testid="stSidebar"] .stCaption,
+[data-testid="stSidebar"] [data-testid="stCaptionContainer"] {{
+  color: {MUTED} !important;
+  margin-bottom: 1rem !important;
+}}
+section[data-testid="stSidebar"] .stRadio > label {{
+  display: none !important;
+}}
+section[data-testid="stSidebar"] .stRadio [role="radiogroup"] {{
+  gap: 0.2rem !important;
+}}
+section[data-testid="stSidebar"] .stRadio [role="radiogroup"] label {{
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  border-radius: 10px !important;
+  padding: 0.65rem 0.75rem !important;
+  margin: 0 !important;
+  color: {SLATE} !important;
+  font-size: 0.92rem !important;
+  font-weight: 500 !important;
+  line-height: 1.3 !important;
+  transition: background 0.15s ease, color 0.15s ease;
+}}
+section[data-testid="stSidebar"] .stRadio [role="radiogroup"] label:hover {{
+  background: #fff !important;
+  border-color: {LINE} !important;
+  color: {INK} !important;
+}}
+section[data-testid="stSidebar"] .stRadio [role="radiogroup"] label[data-checked="true"],
+section[data-testid="stSidebar"] .stRadio [role="radiogroup"] label:has(input:checked) {{
+  background: #fff !important;
+  border-color: {ACCENT} !important;
+  box-shadow: inset 3px 0 0 {ACCENT};
+  color: {INK} !important;
+  font-weight: 700 !important;
+}}
+section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label span {{
+  color: inherit !important;
+}}
+
+/* ===== Hero / sections ===== */
 .hero {{
-  padding: 1.4rem 0 0.6rem 0;
-  animation: rise 0.55s ease-out both;
+  padding: 0.4rem 0 1.1rem 0;
+  border-bottom: 1px solid {LINE};
+  margin-bottom: 1.4rem;
 }}
 .hero-kicker {{
-  font-size: 0.75rem;
-  letter-spacing: 0.14em;
+  display: inline-block;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: {ACCENT};
-  font-weight: 600;
-  margin-bottom: 0.55rem;
+  font-weight: 700;
+  margin-bottom: 0.65rem;
 }}
 .hero h1 {{
-  font-family: 'Fraunces', Georgia, serif !important;
+  font-family: 'Source Serif 4', Georgia, serif !important;
   font-weight: 700 !important;
-  font-size: 2.55rem !important;
-  line-height: 1.15 !important;
-  color: {INK} !important;
-  margin: 0 0 0.7rem 0 !important;
+  font-size: clamp(1.75rem, 3.2vw, 2.35rem) !important;
+  line-height: 1.2 !important;
+  color: {NAVY} !important;
+  margin: 0 0 0.75rem 0 !important;
   letter-spacing: -0.02em;
 }}
 .hero-lead {{
-  font-size: 1.08rem;
-  line-height: 1.55;
-  color: {MUTED};
-  max-width: 46rem;
+  font-size: 1.08rem !important;
+  line-height: 1.6 !important;
+  color: {SLATE} !important;
+  max-width: 40rem;
+  font-weight: 500;
 }}
 .section-label {{
-  font-size: 0.72rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: {MUTED};
-  font-weight: 600;
-  margin: 1.6rem 0 0.45rem 0;
-}}
-.section-title {{
-  font-family: 'Fraunces', Georgia, serif;
-  font-size: 1.65rem;
-  color: {INK};
-  margin: 0 0 0.4rem 0;
-  letter-spacing: -0.015em;
-}}
-.section-sub {{
-  color: {MUTED};
-  font-size: 0.98rem;
-  line-height: 1.5;
-  max-width: 42rem;
-  margin-bottom: 1.1rem;
-}}
-.verdict {{
-  display: flex;
-  gap: 0.85rem;
-  align-items: flex-start;
-  padding: 1rem 1.15rem;
-  border-left: 3px solid {ACCENT};
-  background: {ACCENT_SOFT};
-  margin: 0.8rem 0 1.2rem 0;
-  animation: rise 0.45s ease-out both;
-}}
-.verdict.reject {{ border-left-color: {DENY}; background: #FDECEC; }}
-.verdict.nuance {{ border-left-color: {WARN}; background: #FFF4E5; }}
-.verdict-tag {{
-  font-size: 0.68rem;
-  font-weight: 700;
+  font-size: 0.75rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+  color: {ACCENT};
+  font-weight: 700;
+  margin: 1.75rem 0 0.4rem 0;
+}}
+.section-title {{
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 1.45rem;
+  color: {NAVY};
+  margin: 0 0 0.45rem 0;
+  letter-spacing: -0.015em;
+  font-weight: 700;
+}}
+.section-sub {{
+  color: {SLATE};
+  font-size: 1rem;
+  line-height: 1.55;
+  max-width: 40rem;
+  margin-bottom: 1.15rem;
+  font-weight: 500;
+}}
+
+/* ===== Verdict callouts ===== */
+.verdict {{
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  padding: 1.05rem 1.2rem;
+  border: 1px solid {LINE};
+  border-left: 4px solid {OK};
+  background: #F3FAF5;
+  border-radius: 0 12px 12px 0;
+  margin: 0.9rem 0 1.25rem 0;
+}}
+.verdict.reject {{
+  border-left-color: {DENY};
+  background: #FFF5F5;
+}}
+.verdict.nuance {{
+  border-left-color: {WARN};
+  background: #FFF9EB;
+}}
+.verdict-tag {{
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   white-space: nowrap;
-  padding-top: 0.15rem;
+  padding-top: 0.2rem;
+  color: {OK};
 }}
+.verdict.reject .verdict-tag {{ color: {DENY}; }}
+.verdict.nuance .verdict-tag {{ color: {WARN}; }}
 .verdict-body {{
-  font-size: 0.95rem;
-  line-height: 1.45;
+  font-size: 1rem;
+  line-height: 1.5;
   color: {INK};
+  font-weight: 500;
 }}
+
+/* ===== KPI / findings (Avito cards) ===== */
 .kpi-row {{
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 0.85rem;
-  margin: 1rem 0 1.4rem 0;
+  gap: 12px;
+  margin: 1.1rem 0 1.5rem 0;
 }}
 .kpi {{
-  background: {CARD};
+  background: {SURFACE};
   border: 1px solid {LINE};
-  padding: 1rem 1.05rem 0.95rem;
-  animation: rise 0.5s ease-out both;
+  border-radius: 14px;
+  padding: 1.05rem 1.1rem;
 }}
-.kpi:nth-child(2) {{ animation-delay: 0.05s; }}
-.kpi:nth-child(3) {{ animation-delay: 0.1s; }}
-.kpi:nth-child(4) {{ animation-delay: 0.15s; }}
 .kpi-label {{
-  font-size: 0.7rem;
-  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: {MUTED};
-  margin-bottom: 0.35rem;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
 }}
 .kpi-value {{
-  font-family: 'Fraunces', Georgia, serif;
-  font-size: 1.55rem;
-  color: {INK};
-  line-height: 1.1;
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 1.65rem;
+  color: {NAVY};
+  line-height: 1.15;
+  font-weight: 700;
 }}
 .kpi-hint {{
-  font-size: 0.78rem;
+  font-size: 0.85rem;
   color: {MUTED};
-  margin-top: 0.35rem;
+  margin-top: 0.4rem;
+  font-weight: 500;
 }}
 .finding {{
   background: {CARD};
   border: 1px solid {LINE};
-  padding: 1.1rem 1.2rem;
+  border-radius: 14px;
+  padding: 1.2rem 1.25rem;
   height: 100%;
-  animation: rise 0.5s ease-out both;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
 }}
 .finding-num {{
-  font-family: 'Fraunces', Georgia, serif;
-  font-size: 1.35rem;
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 1.25rem;
   color: {ACCENT};
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.4rem;
+  font-weight: 700;
 }}
 .finding-title {{
-  font-weight: 600;
+  font-weight: 700;
   color: {INK};
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.4rem;
+  font-size: 1.05rem;
 }}
 .finding-body {{
-  font-size: 0.9rem;
-  color: {MUTED};
-  line-height: 1.45;
+  font-size: 0.98rem;
+  color: {SLATE};
+  line-height: 1.5;
+  font-weight: 500;
 }}
 .agenda-item {{
   display: grid;
-  grid-template-columns: 3.2rem 1fr;
-  gap: 0.75rem;
-  padding: 0.85rem 0;
+  grid-template-columns: 3rem 1fr;
+  gap: 0.85rem;
+  padding: 1rem 0;
   border-bottom: 1px solid {LINE};
-  animation: rise 0.4s ease-out both;
 }}
 .agenda-num {{
-  font-family: 'Fraunces', Georgia, serif;
+  font-family: 'Source Serif 4', Georgia, serif;
   color: {ACCENT};
   font-size: 1.2rem;
+  font-weight: 700;
 }}
-.agenda-title {{ color: {INK}; font-weight: 600; }}
-.agenda-q {{ color: {MUTED}; font-size: 0.9rem; margin-top: 0.15rem; }}
+.agenda-title {{
+  color: {INK};
+  font-weight: 700;
+  font-size: 1.05rem;
+}}
+.agenda-q {{
+  color: {SLATE};
+  font-size: 0.98rem;
+  margin-top: 0.2rem;
+  font-weight: 500;
+  line-height: 1.45;
+}}
 .hypothesis {{
-  background: {CARD};
+  background: {SURFACE};
   border: 1px solid {LINE};
-  padding: 0.9rem 1rem;
-  margin-bottom: 0.65rem;
+  border-radius: 12px;
+  padding: 1rem 1.1rem;
+  margin-bottom: 0.55rem;
+  color: {INK};
+  font-size: 1rem;
+  line-height: 1.45;
+  font-weight: 500;
 }}
-.hypothesis b {{ color: {INK}; }}
+.hypothesis b {{
+  color: {ACCENT};
+  font-weight: 800;
+}}
 .footnote {{
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   color: {MUTED};
-  margin-top: 1.5rem;
-  padding-top: 0.8rem;
+  margin-top: 1.75rem;
+  padding-top: 1rem;
   border-top: 1px solid {LINE};
+  line-height: 1.45;
+  font-weight: 500;
 }}
-@keyframes rise {{
-  from {{ opacity: 0; transform: translateY(10px); }}
-  to {{ opacity: 1; transform: translateY(0); }}
-}}
+
 @media (max-width: 900px) {{
   .kpi-row {{ grid-template-columns: 1fr 1fr; }}
-  .hero h1 {{ font-size: 1.9rem !important; }}
+  [data-testid="stMainBlockContainer"] {{
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }}
 }}
-/* streamlit metric polish */
+
 [data-testid="stMetric"] {{
-  background: {CARD};
+  background: {SURFACE};
   border: 1px solid {LINE};
-  padding: 0.75rem 0.9rem;
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+}}
+[data-testid="stMetricLabel"] {{
+  color: {MUTED} !important;
+}}
+[data-testid="stMetricValue"] {{
+  color: {NAVY} !important;
+}}
+
+/* Info / warning boxes readable */
+[data-testid="stAlert"] {{
+  border-radius: 12px !important;
+  border: 1px solid {LINE} !important;
+  color: {INK} !important;
+  font-weight: 500 !important;
+}}
+
+/* Plotly title readability */
+.js-plotly-plot .gtitle {{
+  fill: {INK} !important;
 }}
 </style>
         """,
@@ -387,10 +529,32 @@ def kpi_row(items: List[Tuple[str, str, str]]) -> None:
     st.markdown(f'<div class="kpi-row">{cells}</div>', unsafe_allow_html=True)
 
 
+GROUP_COLORS = {
+    "Аналитика": "#005BFF",
+    "Разработка": "#0A2540",
+    "Продукт": "#1F8A70",
+    "QA и DevOps": "#C45C26",
+    "Дизайн": "#5C5C5C",
+}
+GROUP_PALETTE = list(GROUP_COLORS.values())
+
+
 def style_fig(fig: go.Figure, height: int = 380) -> go.Figure:
     fig.update_layout(**PLOTLY_LAYOUT, height=height)
-    fig.update_xaxes(showgrid=False, zeroline=False, linecolor=LINE)
-    fig.update_yaxes(showgrid=True, gridcolor=LINE, zeroline=False)
+    fig.update_xaxes(
+        showgrid=False,
+        zeroline=False,
+        linecolor=LINE,
+        tickfont=dict(size=12, color=MUTED),
+        title_font=dict(size=13, color=SLATE),
+    )
+    fig.update_yaxes(
+        showgrid=True,
+        gridcolor="#EEEEEE",
+        zeroline=False,
+        tickfont=dict(size=12, color=MUTED),
+        title_font=dict(size=13, color=SLATE),
+    )
     return fig
 
 
@@ -398,9 +562,9 @@ def style_fig(fig: go.Figure, height: int = 380) -> go.Figure:
 
 def page_agenda(df: pd.DataFrame, meta: dict) -> None:
     hero(
-        "Zarplatnik Research Brief",
+        "Research Brief",
         "Сколько на самом деле платят в digital — и почему",
-        "Исследование по открытым срезам zarplatnik.com: роли, грейды, города и форматы работы. "
+        "Исследование зарплат digital-ролей: грейды, города и форматы работы. "
         "Ниже — план, гипотезы и ответы в формате executive storytelling.",
     )
     kpi_row(
@@ -444,8 +608,8 @@ def page_agenda(df: pd.DataFrame, meta: dict) -> None:
             unsafe_allow_html=True,
         )
     st.markdown(
-        '<div class="footnote">* N суммируется по независимым грейд-срезам; человек мог попасть только в один грейд. '
-        "Источник: встроенный JSON zarplatnik.com / design track.</div>",
+        f'<div class="footnote">* N суммируется по независимым грейд-срезам; человек мог попасть только в один грейд. '
+        f"В исследовании скрыты срезы с N &lt; {MIN_N}.</div>",
         unsafe_allow_html=True,
     )
 
@@ -530,7 +694,7 @@ def page_exec(df: pd.DataFrame, meta: dict) -> None:
             y="role_name",
             color="group",
             orientation="h",
-            color_discrete_sequence=["#0E7C66", "#0B1F33", "#3B82A0", "#C4A574", "#64748B"],
+            color_discrete_map=GROUP_COLORS,
             labels={"p50": "Медиана, ₽", "role_name": "", "group": "Группа"},
         )
         fig.update_layout(yaxis=dict(categoryorder="total ascending"), legend_title="")
@@ -568,13 +732,7 @@ def page_map(df: pd.DataFrame) -> None:
     c1, c2 = st.columns((1.35, 1))
     with c1:
         fig = go.Figure()
-        colors = {
-            "Аналитика": "#0E7C66",
-            "Разработка": "#0B1F33",
-            "Продукт": "#3B82A0",
-            "QA и DevOps": "#C4A574",
-            "Дизайн": "#64748B",
-        }
+        colors = GROUP_COLORS
         for _, r in mid.iterrows():
             fig.add_trace(
                 go.Bar(
@@ -713,7 +871,7 @@ def page_ladder(df: pd.DataFrame) -> None:
             color="group",
             orientation="h",
             labels={"ratio": "Senior / Junior", "role_name": "", "group": "Группа"},
-            color_discrete_sequence=["#0E7C66", "#0B1F33", "#3B82A0", "#C4A574", "#64748B"],
+            color_discrete_map=GROUP_COLORS,
         )
         fig.add_vline(x=2.5, line_dash="dot", line_color=MUTED, annotation_text="2.5×")
         fig.update_layout(yaxis=dict(categoryorder="total ascending"), title="Множитель Senior/Junior")
@@ -741,7 +899,7 @@ def page_ladder(df: pd.DataFrame) -> None:
                 x=curve["grade_name"].tolist() + curve["grade_name"].tolist()[::-1],
                 y=curve["p75"].tolist() + curve["p25"].tolist()[::-1],
                 fill="toself",
-                fillcolor="rgba(14,124,102,0.12)",
+                fillcolor="rgba(0,91,255,0.12)",
                 line=dict(color="rgba(0,0,0,0)"),
                 name="p25–p75",
                 hoverinfo="skip",
@@ -831,7 +989,7 @@ def page_geo(df: pd.DataFrame) -> None:
         size="n_msk",
         hover_data={"role_name": True, "grade_name": True, "lift": ":.0%", "all": True, "msk": True},
         labels={"all": "Все города, медиана", "msk": "Москва, медиана", "group": "Группа"},
-        color_discrete_sequence=["#0E7C66", "#0B1F33", "#3B82A0", "#C4A574", "#64748B"],
+        color_discrete_map=GROUP_COLORS,
     )
     mx = max(gdf["all"].max(), gdf["msk"].max()) * 1.05
     fig.add_trace(
@@ -944,7 +1102,7 @@ def page_format(df: pd.DataFrame) -> None:
                 "format_name": ["Полная удалёнка", "Гибрид", "Офис"],
                 "grade_name": ["Middle", "Senior"],
             },
-            color_discrete_sequence=["#0B1F33", "#0E7C66", "#C4A574"],
+            color_discrete_sequence=["#0A2540", "#005BFF", "#C45C26"],
             labels={"p50": "Медиана", "grade_name": "", "format_name": "Формат"},
         )
         fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
@@ -1010,7 +1168,7 @@ def page_spread(df: pd.DataFrame) -> None:
             "group": "Группа",
             "n": "N",
         },
-        color_discrete_sequence=["#0E7C66", "#0B1F33", "#3B82A0", "#C4A574", "#64748B"],
+        color_discrete_map=GROUP_COLORS,
     )
     fig.update_layout(title="Уровень оплаты vs неопределённость")
     fig.update_yaxes(tickformat=".0%")
@@ -1088,8 +1246,8 @@ def page_so_what(df: pd.DataFrame) -> None:
         verdict(kind, tag, title)
 
     st.markdown(
-        f'<div class="footnote">Методология: открытые агрегаты zarplatnik.com; срезы с N &lt; {MIN_N} '
-        "скрыты. Это не причинно-следственный вывод — наблюдательная картина рынка.</div>",
+        f'<div class="footnote">Срезы с N &lt; {MIN_N} скрыты. '
+        "Это наблюдательная картина рынка, а не причинно-следственный вывод.</div>",
         unsafe_allow_html=True,
     )
 
@@ -1098,7 +1256,7 @@ def page_so_what(df: pd.DataFrame) -> None:
 
 def main() -> None:
     st.set_page_config(
-        page_title="Zarplatnik Research",
+        page_title="Salary Research",
         page_icon="◈",
         layout="wide",
         initial_sidebar_state="expanded",
@@ -1108,20 +1266,18 @@ def main() -> None:
     try:
         df, meta = load_data()
     except FileNotFoundError:
-        st.error("Нет данных. Сначала: `python3 zarplatnik_parser.py`")
+        st.error("Нет данных для исследования.")
         return
 
     with st.sidebar:
-        st.markdown("### Zarplatnik")
-        st.caption("Research storytelling")
+        st.markdown("### Research")
+        st.caption("Содержание")
         chapter = st.radio(
             "Содержание",
             options=[c[0] for c in CHAPTERS],
             format_func=lambda x: dict(CHAPTERS)[x],
             label_visibility="collapsed",
         )
-        st.divider()
-        st.caption("Источник: zarplatnik.com")
 
     if chapter == "agenda":
         page_agenda(df, meta)
