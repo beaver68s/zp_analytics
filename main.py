@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Zarplatnik Research — McKinsey-style storytelling dashboard.
-План: Agenda → Executive Summary → 5 глав с гипотезами → Explore → Implications.
+План: Agenda → Executive Summary → главы с гипотезами → Implications.
 """
 
 from __future__ import annotations
@@ -17,6 +17,8 @@ import streamlit as st
 
 DATA_DIR = Path(__file__).resolve().parent / "zarplatnik_data"
 BIN_STEP = 20_000
+MIN_N = 15  # скрываем слишком тонкие срезы в исследовании
+FOCUS_ROLE = "data-analyst"  # роль для иллюстрации кривой грейдов
 
 # --- Visual system (cool slate + ink, not purple/cream AI defaults) ---
 INK = "#0B1F33"
@@ -45,8 +47,7 @@ CHAPTERS = [
     ("geo", "05 · География"),
     ("format", "06 · Формат работы"),
     ("spread", "07 · Разброс зарплат"),
-    ("explore", "08 · Explore"),
-    ("so_what", "09 · So what"),
+    ("so_what", "08 · So what"),
 ]
 
 
@@ -449,7 +450,7 @@ def page_agenda(df: pd.DataFrame, meta: dict) -> None:
     )
 
 
-def page_exec(df: pd.DataFrame, meta: dict, groups: List[str], min_n: int) -> None:
+def page_exec(df: pd.DataFrame, meta: dict) -> None:
     hero(
         "02 · Executive Summary",
         "Пять выводов, которые меняют переговорную позицию",
@@ -457,9 +458,7 @@ def page_exec(df: pd.DataFrame, meta: dict, groups: List[str], min_n: int) -> No
     )
 
     base = base_slice(df)
-    if groups:
-        base = base[base.group.isin(groups)]
-    base = base[base.n >= min_n]
+    base = base[base.n >= MIN_N]
     mid = base[base.grade == "middle"].sort_values("p50", ascending=False)
 
     # ladder ratios
@@ -538,19 +537,17 @@ def page_exec(df: pd.DataFrame, meta: dict, groups: List[str], min_n: int) -> No
         st.plotly_chart(style_fig(fig, 420), use_container_width=True)
 
 
-def page_map(df: pd.DataFrame, groups: List[str], min_n: int) -> None:
+def page_map(df: pd.DataFrame) -> None:
     hero(
         "03 · Карта рынка · H4",
         "Кто на самом деле на вершине Middle",
         "Сравниваем медианы при фиксированном грейде Middle — без шума города и формата.",
     )
     base = base_slice(df)
-    if groups:
-        base = base[base.group.isin(groups)]
-    mid = base[(base.grade == "middle") & (base.n >= min_n)].sort_values("p50", ascending=False)
+    mid = base[(base.grade == "middle") & (base.n >= MIN_N)].sort_values("p50", ascending=False)
 
     if mid.empty:
-        st.info("Нет данных под текущие фильтры — ослабьте ограничения в сайдбаре.")
+        st.info("Нет данных для карты Middle при текущем пороге N.")
         return
 
     top3 = mid.head(3)["role_name"].tolist()
@@ -631,7 +628,7 @@ def page_map(df: pd.DataFrame, groups: List[str], min_n: int) -> None:
         )
         fig2.update_traces(textposition="outside", cliponaxis=False)
         st.plotly_chart(style_fig(fig2, 320), use_container_width=True)
-        st.caption("Медиана медиан ролей внутри группы · только Middle · N ≥ фильтра.")
+        st.caption(f"Медиана медиан ролей внутри группы · только Middle · N ≥ {MIN_N}.")
 
     st.dataframe(
         mid[["role_name", "group", "n", "p25", "p50", "p75"]]
@@ -656,15 +653,13 @@ def page_map(df: pd.DataFrame, groups: List[str], min_n: int) -> None:
     )
 
 
-def page_ladder(df: pd.DataFrame, groups: List[str], min_n: int, focus_role: str) -> None:
+def page_ladder(df: pd.DataFrame) -> None:
     hero(
         "04 · Карьерная лестница · H1 / H6",
         "Грейд двигает чек сильнее, чем почти любой другой фактор",
         "Смотрим отношение Senior / Junior и форму кривой по грейдам.",
     )
     base = base_slice(df)
-    if groups:
-        base = base[base.group.isin(groups)]
 
     ratios = []
     for role in base.role.unique():
@@ -672,7 +667,7 @@ def page_ladder(df: pd.DataFrame, groups: List[str], min_n: int, focus_role: str
         sub_i = sub.set_index("grade")
         if "junior" not in sub_i.index or "senior" not in sub_i.index:
             continue
-        if sub_i.loc["junior", "n"] < min_n or sub_i.loc["senior", "n"] < min_n:
+        if sub_i.loc["junior", "n"] < MIN_N or sub_i.loc["senior", "n"] < MIN_N:
             continue
         ratios.append(
             {
@@ -688,7 +683,7 @@ def page_ladder(df: pd.DataFrame, groups: List[str], min_n: int, focus_role: str
         )
     rdf = pd.DataFrame(ratios).sort_values("ratio", ascending=False)
     if rdf.empty:
-        st.info("Недостаточно данных Junior+Senior под фильтр N.")
+        st.info(f"Недостаточно данных Junior+Senior (N ≥ {MIN_N}).")
         return
 
     top = rdf.iloc[0]
@@ -725,7 +720,7 @@ def page_ladder(df: pd.DataFrame, groups: List[str], min_n: int, focus_role: str
         st.plotly_chart(style_fig(fig, 420), use_container_width=True)
 
     with c2:
-        role = focus_role if focus_role in set(base.role) else rdf.iloc[0]["role"]
+        role = FOCUS_ROLE if FOCUS_ROLE in set(base.role) else rdf.iloc[0]["role"]
         curve = base[base.role == role].copy()
         order = [g for g in meta_grade_order() if g in set(curve.grade)]
         curve["grade"] = pd.Categorical(curve["grade"], categories=order, ordered=True)
@@ -755,7 +750,7 @@ def page_ladder(df: pd.DataFrame, groups: List[str], min_n: int, focus_role: str
         name = curve.iloc[0]["role_name"] if len(curve) else role
         fig2.update_layout(title=f"Кривая грейдов · {name}", yaxis_title="₽")
         st.plotly_chart(style_fig(fig2, 420), use_container_width=True)
-        st.caption("Выберите роль в сайдбаре (Focus role), чтобы сменить кривую.")
+        st.caption("Иллюстрация на примере аналитика данных.")
 
 
 def meta_grade_order() -> List[str]:
@@ -772,7 +767,7 @@ def meta_grade_order() -> List[str]:
     ]
 
 
-def page_geo(df: pd.DataFrame, groups: List[str], min_n: int) -> None:
+def page_geo(df: pd.DataFrame) -> None:
     hero(
         "05 · География · H2",
         "Московская премия есть — но она скромнее легенды",
@@ -782,9 +777,7 @@ def page_geo(df: pd.DataFrame, groups: List[str], min_n: int) -> None:
     for _, r in df.iterrows():
         if r["city"] != "msk" or r["format"] != "*":
             continue
-        if groups and r["group"] not in groups:
-            continue
-        if r["n"] < min_n:
+        if r["n"] < MIN_N:
             continue
         allc = df[
             (df.role == r.role)
@@ -810,7 +803,7 @@ def page_geo(df: pd.DataFrame, groups: List[str], min_n: int) -> None:
         )
     gdf = pd.DataFrame(rows)
     if gdf.empty:
-        st.info("Мало московских срезов под фильтр.")
+        st.info(f"Мало московских срезов с N ≥ {MIN_N}.")
         return
 
     med_lift = gdf["lift"].median()
@@ -877,18 +870,16 @@ def page_geo(df: pd.DataFrame, groups: List[str], min_n: int) -> None:
     )
 
 
-def page_format(df: pd.DataFrame, groups: List[str], min_n: int) -> None:
+def page_format(df: pd.DataFrame) -> None:
     hero(
         "06 · Формат работы · H3",
         "Удалёнка не выглядит «штрафом»",
         "Сравниваем remote / hybrid / office при city = все города.",
     )
     fdf = df[(df.city == "*") & (df.format != "*") & (df.grade != "*")].copy()
-    if groups:
-        fdf = fdf[fdf.group.isin(groups)]
-    fdf = fdf[fdf.n >= min_n]
+    fdf = fdf[fdf.n >= MIN_N]
     if fdf.empty:
-        st.info("Нет срезов по форматам под фильтр.")
+        st.info(f"Нет срезов по форматам с N ≥ {MIN_N}.")
         return
 
     # pivot roles that have ≥2 formats on same grade
@@ -980,7 +971,7 @@ def page_format(df: pd.DataFrame, groups: List[str], min_n: int) -> None:
     )
 
 
-def page_spread(df: pd.DataFrame, groups: List[str], min_n: int) -> None:
+def page_spread(df: pd.DataFrame) -> None:
     hero(
         "07 · Разброс зарплат · H5",
         "Где «медиана» врёт сильнее всего",
@@ -988,9 +979,7 @@ def page_spread(df: pd.DataFrame, groups: List[str], min_n: int) -> None:
     )
     mid = base_slice(df)
     mid = mid[mid.grade == "middle"]
-    if groups:
-        mid = mid[mid.group.isin(groups)]
-    mid = mid[mid.n >= min_n].copy()
+    mid = mid[mid.n >= MIN_N].copy()
     mid["iqr"] = mid["p75"] - mid["p25"]
     mid["iqr_pct"] = mid["iqr"] / mid["p50"]
     mid = mid.sort_values("iqr_pct", ascending=False)
@@ -1047,83 +1036,9 @@ def page_spread(df: pd.DataFrame, groups: List[str], min_n: int) -> None:
     )
 
 
-def page_explore(
-    df: pd.DataFrame,
-    meta: dict,
-    role: str,
-    grade: str,
-    city: str,
-    fmt: str,
-) -> None:
+def page_so_what(df: pd.DataFrame) -> None:
     hero(
-        "08 · Explore",
-        "Соберите свой срез",
-        "Свободный конструктор: роль × грейд × город × формат. Если точного среза нет — покажем ближайшие.",
-    )
-    key = f"{role}|{grade}|{city}|{fmt}"
-    hit = df[df.key == key]
-    role_name = meta["role_map"].get(role, role)
-
-    if hit.empty:
-        st.warning("Точного среза нет. Ниже — доступные комбинации для этой роли.")
-        neigh = df[df.role == role][
-            ["grade_name", "city_name", "format_name", "n", "p25", "p50", "p75"]
-        ]
-        st.dataframe(neigh, use_container_width=True, hide_index=True)
-        return
-
-    row = hit.iloc[0]
-    kpi_row(
-        [
-            ("Ответов", str(int(row["n"])), row["city_name"]),
-            ("p25", money(row["p25"]), "нижняя четверть"),
-            ("Медиана", money(row["p50"]), row["grade_name"]),
-            ("p75", money(row["p75"]), "верхняя четверть"),
-        ]
-    )
-
-    c1, c2 = st.columns((1.2, 1))
-    with c1:
-        counts = row["counts"]
-        start = int(row["from_"] or 0)
-        if counts:
-            labels = [f"{(start + i * BIN_STEP) // 1000}k" for i in range(len(counts))]
-            fig = go.Figure(
-                go.Bar(
-                    x=labels,
-                    y=counts,
-                    marker_color=ACCENT,
-                    hovertemplate="%{x}: %{y}<extra></extra>",
-                )
-            )
-            fig.update_layout(title=f"Распределение · {role_name}", yaxis_title="Ответов")
-            st.plotly_chart(style_fig(fig, 360), use_container_width=True)
-    with c2:
-        ladder = df[
-            (df.role == role) & (df.city == city) & (df.format == fmt) & (df.grade != "*")
-        ].copy()
-        if ladder.empty:
-            ladder = base_slice(df)
-            ladder = ladder[ladder.role == role]
-        order = [g for g in meta["grade_order"] if g in set(ladder.grade)]
-        ladder["grade"] = pd.Categorical(ladder["grade"], categories=order, ordered=True)
-        ladder = ladder.sort_values("grade")
-        fig2 = go.Figure(
-            go.Scatter(
-                x=ladder["grade_name"],
-                y=ladder["p50"],
-                mode="lines+markers",
-                line=dict(color=INK, width=3),
-                marker=dict(size=10, color=ACCENT),
-            )
-        )
-        fig2.update_layout(title="Медиана по грейдам", yaxis_title="₽")
-        st.plotly_chart(style_fig(fig2, 360), use_container_width=True)
-
-
-def page_so_what(df: pd.DataFrame, groups: List[str], min_n: int) -> None:
-    hero(
-        "09 · So what",
+        "08 · So what",
         "Что делать с этими цифрами",
         "Импликации для кандидата, нанимающего менеджера и компенсации.",
     )
@@ -1173,8 +1088,8 @@ def page_so_what(df: pd.DataFrame, groups: List[str], min_n: int) -> None:
         verdict(kind, tag, title)
 
     st.markdown(
-        '<div class="footnote">Методология: открытые агрегаты zarplatnik.com; срезы с N ниже порога в сайдбаре '
-        "скрываются. Это не причинно-следственный вывод — наблюдательная картина рынка.</div>",
+        f'<div class="footnote">Методология: открытые агрегаты zarplatnik.com; срезы с N &lt; {MIN_N} '
+        "скрыты. Это не причинно-следственный вывод — наблюдательная картина рынка.</div>",
         unsafe_allow_html=True,
     )
 
@@ -1200,71 +1115,30 @@ def main() -> None:
         st.markdown("### Zarplatnik")
         st.caption("Research storytelling")
         chapter = st.radio(
-            "Глава",
+            "Содержание",
             options=[c[0] for c in CHAPTERS],
             format_func=lambda x: dict(CHAPTERS)[x],
+            label_visibility="collapsed",
         )
         st.divider()
-        st.markdown("##### Фильтры исследования")
-        all_groups = sorted(df["group"].dropna().unique())
-        groups = st.multiselect("Функции", all_groups, default=all_groups)
-        min_n = st.slider("Мин. N в срезе", 5, 50, 15, 5)
-
-        st.markdown("##### Focus / Explore")
-        roles = sorted(df["role"].unique(), key=lambda x: meta["role_map"].get(x, x))
-        focus_role = st.selectbox(
-            "Focus role",
-            roles,
-            index=roles.index("data-analyst") if "data-analyst" in roles else 0,
-            format_func=lambda x: meta["role_map"].get(x, x),
-        )
-        grades = ["*"] + meta["grade_order"]
-        grade = st.selectbox(
-            "Грейд",
-            grades,
-            index=grades.index("middle"),
-            format_func=lambda x: "Все" if x == "*" else meta["grade_map"].get(x, x),
-        )
-        cities = ["*"] + sorted(
-            {c for c in df.city.unique() if c != "*"},
-            key=lambda x: (0 if x == "msk" else 1, meta["city_map"].get(x, x)),
-        )
-        city = st.selectbox(
-            "Город",
-            cities,
-            format_func=lambda x: "Все города" if x == "*" else meta["city_map"].get(x, x),
-        )
-        formats = ["*"] + sorted(f for f in df.format.unique() if f != "*")
-        fmt = st.selectbox(
-            "Формат",
-            formats,
-            format_func=lambda x: "Все форматы" if x == "*" else meta["format_map"].get(x, x),
-        )
-        st.divider()
-        st.caption("Источник: zarplatnik.com · парсер в репозитории")
-
-    if not groups:
-        st.warning("Выберите хотя бы одну функцию в фильтрах.")
-        return
+        st.caption("Источник: zarplatnik.com")
 
     if chapter == "agenda":
         page_agenda(df, meta)
     elif chapter == "exec":
-        page_exec(df, meta, groups, min_n)
+        page_exec(df, meta)
     elif chapter == "map":
-        page_map(df, groups, min_n)
+        page_map(df)
     elif chapter == "ladder":
-        page_ladder(df, groups, min_n, focus_role)
+        page_ladder(df)
     elif chapter == "geo":
-        page_geo(df, groups, min_n)
+        page_geo(df)
     elif chapter == "format":
-        page_format(df, groups, min_n)
+        page_format(df)
     elif chapter == "spread":
-        page_spread(df, groups, min_n)
-    elif chapter == "explore":
-        page_explore(df, meta, focus_role, grade, city, fmt)
+        page_spread(df)
     else:
-        page_so_what(df, groups, min_n)
+        page_so_what(df)
 
 
 if __name__ == "__main__":
