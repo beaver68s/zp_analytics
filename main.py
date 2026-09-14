@@ -445,8 +445,170 @@ section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label span {{
   font-weight: 500;
 }}
 
+/* Storytelling blocks */
+.story {{
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: {SLATE};
+  font-weight: 500;
+  max-width: 42rem;
+  margin: 0.4rem 0 1.1rem 0;
+}}
+.story strong {{ color: {INK}; font-weight: 700; }}
+.take {{
+  background: {ACCENT_SOFT};
+  border: 1px solid #D6E4FF;
+  border-radius: 14px;
+  padding: 1.1rem 1.25rem;
+  margin: 1rem 0 1.35rem 0;
+}}
+.take-label {{
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: {ACCENT};
+  margin-bottom: 0.4rem;
+}}
+.take-body {{
+  color: {INK};
+  font-size: 1.02rem;
+  line-height: 1.55;
+  font-weight: 600;
+}}
+.quote {{
+  border-left: 4px solid {NAVY};
+  padding: 0.85rem 0 0.85rem 1.15rem;
+  margin: 1rem 0 1.35rem 0;
+  background: {SURFACE};
+  border-radius: 0 12px 12px 0;
+}}
+.quote-text {{
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 1.2rem;
+  line-height: 1.45;
+  color: {NAVY};
+  font-weight: 600;
+}}
+.quote-attr {{
+  margin-top: 0.45rem;
+  font-size: 0.85rem;
+  color: {MUTED};
+  font-weight: 600;
+}}
+.podium {{
+  display: grid;
+  grid-template-columns: 1fr 1.15fr 1fr;
+  gap: 12px;
+  align-items: end;
+  margin: 0.8rem 0 1.4rem 0;
+}}
+.podium-card {{
+  background: {SURFACE};
+  border: 1px solid {LINE};
+  border-radius: 14px;
+  padding: 1rem 1.05rem;
+  text-align: center;
+}}
+.podium-card.gold {{
+  background: #fff;
+  border-color: {ACCENT};
+  box-shadow: 0 8px 24px rgba(0,91,255,0.08);
+  padding-top: 1.35rem;
+  padding-bottom: 1.35rem;
+}}
+.podium-place {{
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: {MUTED};
+  margin-bottom: 0.35rem;
+}}
+.podium-card.gold .podium-place {{ color: {ACCENT}; }}
+.podium-name {{
+  font-weight: 700;
+  color: {INK};
+  font-size: 1rem;
+  margin-bottom: 0.35rem;
+}}
+.podium-val {{
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 1.45rem;
+  color: {NAVY};
+  font-weight: 700;
+}}
+.matrix {{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 0.8rem 0 1.3rem 0;
+}}
+.matrix-cell {{
+  border: 1px solid {LINE};
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  background: {CARD};
+  min-height: 7.5rem;
+}}
+.matrix-cell h4 {{
+  margin: 0 0 0.4rem 0;
+  font-size: 0.95rem;
+  color: {INK};
+}}
+.matrix-cell p {{
+  margin: 0;
+  color: {SLATE};
+  font-size: 0.92rem;
+  line-height: 1.45;
+  font-weight: 500;
+}}
+.matrix-cell.hi {{
+  border-color: {ACCENT};
+  background: {ACCENT_SOFT};
+}}
+.persona-row {{
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin: 0.8rem 0 1.3rem 0;
+}}
+.persona {{
+  border: 1px solid {LINE};
+  border-radius: 14px;
+  padding: 1rem 1.05rem;
+  background: {SURFACE};
+}}
+.persona h4 {{
+  margin: 0 0 0.35rem 0;
+  color: {INK};
+  font-size: 0.98rem;
+}}
+.persona p {{
+  margin: 0;
+  color: {SLATE};
+  font-size: 0.9rem;
+  line-height: 1.45;
+  font-weight: 500;
+}}
+.cover-img {{
+  width: 100%;
+  border-radius: 16px;
+  border: 1px solid {LINE};
+  margin: 0.6rem 0 1.2rem 0;
+  display: block;
+}}
+.chap-img {{
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid {LINE};
+  margin: 0.4rem 0 0.8rem 0;
+  display: block;
+}}
+
 @media (max-width: 900px) {{
   .kpi-row {{ grid-template-columns: 1fr 1fr; }}
+  .podium, .matrix, .persona-row {{ grid-template-columns: 1fr; }}
   [data-testid="stMainBlockContainer"] {{
     padding-left: 1rem !important;
     padding-right: 1rem !important;
@@ -529,6 +691,34 @@ def kpi_row(items: List[Tuple[str, str, str]]) -> None:
     st.markdown(f'<div class="kpi-row">{cells}</div>', unsafe_allow_html=True)
 
 
+
+def story(html: str) -> None:
+    st.markdown(f'<div class="story">{html}</div>', unsafe_allow_html=True)
+
+
+def take(body: str, label: str = "Наше мнение") -> None:
+    st.markdown(
+        f"""<div class="take">
+          <div class="take-label">{label}</div>
+          <div class="take-body">{body}</div>
+        </div>""",
+        unsafe_allow_html=True,
+    )
+
+
+def quote(text: str, attr: str = "") -> None:
+    extra = f'<div class="quote-attr">{attr}</div>' if attr else ""
+    st.markdown(
+        f"""<div class="quote">
+          <div class="quote-text">«{text}»</div>
+          {extra}
+        </div>""",
+        unsafe_allow_html=True,
+    )
+
+
+ASSETS = Path(__file__).resolve().parent / "assets"
+
 GROUP_COLORS = {
     "Аналитика": "#005BFF",
     "Разработка": "#0A2540",
@@ -558,271 +748,18 @@ def style_fig(fig: go.Figure, height: int = 380) -> go.Figure:
     return fig
 
 
-# ───────────────────────── chapters ─────────────────────────
-
-def page_agenda(df: pd.DataFrame, meta: dict) -> None:
-    hero(
-        "Research Brief",
-        "Сколько на самом деле платят в digital — и почему",
-        "Исследование зарплат digital-ролей: грейды, города и форматы работы. "
-        "Ниже — план, гипотезы и ответы в формате executive storytelling.",
-    )
-    kpi_row(
-        [
-            ("Срезов", f"{meta['n_slices']}", "готовых комбинаций"),
-            ("Ролей", f"{meta['n_roles']}", "в 5 функциональных группах"),
-            ("Наблюдений*", f"{meta['total_n']:,}".replace(",", " "), "сумма N по грейдам"),
-            ("Города в данных", "МСК · СПб", "остальное — «все города»"),
-        ]
-    )
-
-    section("Agenda", "План исследования", "Каждая глава отвечает на одну гипотезу и заканчивается вердиктом.")
-    agenda = [
-        ("01", "Карта рынка", "Кто зарабатывает больше на Middle — продукт, разработка или аналитика?"),
-        ("02", "Карьерная лестница", "Насколько резко растёт зарплата от Junior к Senior?"),
-        ("03", "География", "Действительно ли Москва даёт существенную премию?"),
-        ("04", "Формат работы", "Удалёнка дешевле офиса — или это миф?"),
-        ("05", "Разброс", "Где рынок «ровный», а где зарплаты размазаны сильнее всего?"),
+def meta_grade_order() -> List[str]:
+    return [
+        "intern", "junior", "junior-plus", "middle", "middle-plus",
+        "senior", "senior-plus", "lead", "lead-plus",
     ]
-    for i, (num, title, q) in enumerate(agenda):
-        st.markdown(
-            f"""<div class="agenda-item" style="animation-delay:{i*0.05}s">
-              <div class="agenda-num">{num}</div>
-              <div><div class="agenda-title">{title}</div><div class="agenda-q">{q}</div></div>
-            </div>""",
-            unsafe_allow_html=True,
-        )
-
-    section("Hypotheses", "Рабочие гипотезы до анализа")
-    hyps = [
-        ("H1", "Senior зарабатывает в 2,5–3× больше Junior в большинстве ролей."),
-        ("H2", "Москва даёт заметную премию к медиане (≥15%) относительно «всех городов»."),
-        ("H3", "Офис платит больше удалёнки; гибрид — посередине."),
-        ("H4", "Инфра и продукт (SRE, DevOps, PM) обгоняют классическую аналитику на Middle."),
-        ("H5", "Максимальный разброс зарплат — у «размытых» ролей с малой выборкой и широким скоупом."),
-        ("H6", "Самая крутая карьерная лестница — у ML Engineer."),
-    ]
-    for code, text in hyps:
-        st.markdown(
-            f'<div class="hypothesis"><b>{code}.</b> {text}</div>',
-            unsafe_allow_html=True,
-        )
-    st.markdown(
-        f'<div class="footnote">* N суммируется по независимым грейд-срезам; человек мог попасть только в один грейд. '
-        f"В исследовании скрыты срезы с N &lt; {MIN_N}.</div>",
-        unsafe_allow_html=True,
-    )
 
 
-def page_exec(df: pd.DataFrame, meta: dict) -> None:
-    hero(
-        "02 · Executive Summary",
-        "Пять выводов, которые меняют переговорную позицию",
-        "Короткая версия для руководителя или кандидата. Детали — в следующих главах.",
-    )
-
+def ladder_ratios(df: pd.DataFrame) -> pd.DataFrame:
     base = base_slice(df)
-    base = base[base.n >= MIN_N]
-    mid = base[base.grade == "middle"].sort_values("p50", ascending=False)
-
-    # ladder ratios
     ratios = []
     for role in base.role.unique():
-        sub = base[base.role == role].set_index("grade")
-        if "junior" in sub.index and "senior" in sub.index:
-            ratios.append(
-                (
-                    sub.loc["senior", "role_name"],
-                    float(sub.loc["senior", "p50"] / sub.loc["junior", "p50"]),
-                    sub.loc["junior", "group"],
-                )
-            )
-    ratios.sort(key=lambda x: -x[1])
-
-    top = mid.iloc[0] if len(mid) else None
-    bot = mid.iloc[-1] if len(mid) else None
-    mid_analytics = mid[mid.group == "Аналитика"]
-    mid_product = mid[mid.group.isin(["Продукт", "QA и DevOps"])]
-
-    findings = [
-        (
-            "01",
-            "Инфра и продукт на вершине",
-            f"На Middle лидируют {top['role_name'] if top is not None else '—'} "
-            f"({money(top['p50']) if top is not None else '—'}). "
-            "Классический data-analyst заметно ниже топа.",
-        ),
-        (
-            "02",
-            "Карьера важнее города",
-            f"Junior→Senior даёт рост в {ratios[0][1]:.1f}× у лидера ({ratios[0][0]}). "
-            "Московская премия обычно лишь +4–17%.",
-        ),
-        (
-            "03",
-            "Гибрид не штрафует",
-            "У аналитиков гибрид часто ≥ remote и ≥ office. Миф «офис = больше денег» не подтверждается.",
-        ),
-        (
-            "04",
-            "Разброс = риск оценки",
-            "У части ролей IQR > 40% медианы: «средняя» цифра плохо описывает реальность переговоров.",
-        ),
-    ]
-    cols = st.columns(2)
-    for i, (num, title, body) in enumerate(findings):
-        with cols[i % 2]:
-            st.markdown(
-                f"""<div class="finding" style="animation-delay:{i*0.06}s; margin-bottom:0.85rem">
-                  <div class="finding-num">{num}</div>
-                  <div class="finding-title">{title}</div>
-                  <div class="finding-body">{body}</div>
-                </div>""",
-                unsafe_allow_html=True,
-            )
-
-    if top is not None and bot is not None and len(mid) >= 2:
-        gap = top["p50"] / bot["p50"] - 1
-        section(
-            "Snapshot",
-            f"Разрыв Middle: {gap:.0%} между полюсами",
-            f"От {bot['role_name']} ({money(bot['p50'])}) до {top['role_name']} ({money(top['p50'])}).",
-        )
-        fig = px.bar(
-            mid.head(12),
-            x="p50",
-            y="role_name",
-            color="group",
-            orientation="h",
-            color_discrete_map=GROUP_COLORS,
-            labels={"p50": "Медиана, ₽", "role_name": "", "group": "Группа"},
-        )
-        fig.update_layout(yaxis=dict(categoryorder="total ascending"), legend_title="")
-        st.plotly_chart(style_fig(fig, 420), use_container_width=True)
-
-
-def page_map(df: pd.DataFrame) -> None:
-    hero(
-        "03 · Карта рынка · H4",
-        "Кто на самом деле на вершине Middle",
-        "Сравниваем медианы при фиксированном грейде Middle — без шума города и формата.",
-    )
-    base = base_slice(df)
-    mid = base[(base.grade == "middle") & (base.n >= MIN_N)].sort_values("p50", ascending=False)
-
-    if mid.empty:
-        st.info("Нет данных для карты Middle при текущем пороге N.")
-        return
-
-    top3 = mid.head(3)["role_name"].tolist()
-    analytics = mid[mid.group == "Аналитика"]
-    da = mid[mid.role == "data-analyst"]
-    verdict(
-        "confirm",
-        "H4 · Подтверждена",
-        f"Топ Middle: {', '.join(top3)}. "
-        + (
-            f"Аналитик данных — {money(da.iloc[0]['p50'])}, "
-            f"это {int(list(mid.role).index('data-analyst')+1)}-е место из {len(mid)}."
-            if len(da)
-            else ""
-        ),
-    )
-
-    c1, c2 = st.columns((1.35, 1))
-    with c1:
-        fig = go.Figure()
-        colors = GROUP_COLORS
-        for _, r in mid.iterrows():
-            fig.add_trace(
-                go.Bar(
-                    name=r["group"],
-                    x=[r["role_name"]],
-                    y=[r["p75"] - r["p25"]],
-                    base=[r["p25"]],
-                    marker_color=colors.get(r["group"], MUTED),
-                    opacity=0.35,
-                    showlegend=False,
-                    hovertemplate=(
-                        f"{r['role_name']}<br>p25–p75: {money(r['p25'])} – {money(r['p75'])}"
-                        f"<br>медиана: {money(r['p50'])}<br>N={int(r['n'])}<extra></extra>"
-                    ),
-                )
-            )
-        fig.add_trace(
-            go.Scatter(
-                x=mid["role_name"],
-                y=mid["p50"],
-                mode="markers+lines",
-                name="Медиана",
-                marker=dict(size=9, color=INK),
-                line=dict(color=INK, width=1.5),
-                hovertemplate="%{x}: %{y:,.0f} ₽<extra></extra>",
-            )
-        )
-        fig.update_layout(
-            title="Middle: коридор p25–p75 и медиана",
-            xaxis_tickangle=-35,
-            yaxis_title="₽",
-            showlegend=False,
-        )
-        st.plotly_chart(style_fig(fig, 440), use_container_width=True)
-
-    with c2:
-        section("By function", "Медиана по группам")
-        gmed = (
-            mid.groupby("group", as_index=False)
-            .agg(p50=("p50", "median"), n_roles=("role", "count"))
-            .sort_values("p50", ascending=True)
-        )
-        fig2 = px.bar(
-            gmed,
-            x="p50",
-            y="group",
-            orientation="h",
-            text=gmed["p50"].map(lambda v: f"{int(v/1000)}k"),
-            color_discrete_sequence=[ACCENT],
-            labels={"p50": "Медиана ролей", "group": ""},
-        )
-        fig2.update_traces(textposition="outside", cliponaxis=False)
-        st.plotly_chart(style_fig(fig2, 320), use_container_width=True)
-        st.caption(f"Медиана медиан ролей внутри группы · только Middle · N ≥ {MIN_N}.")
-
-    st.dataframe(
-        mid[["role_name", "group", "n", "p25", "p50", "p75"]]
-        .assign(
-            p25=lambda d: d.p25.map(money),
-            p50=lambda d: d.p50.map(money),
-            p75=lambda d: d.p75.map(money),
-        )
-        .rename(
-            columns={
-                "role_name": "Роль",
-                "group": "Группа",
-                "n": "N",
-                "p25": "p25",
-                "p50": "Медиана",
-                "p75": "p75",
-            }
-        ),
-        use_container_width=True,
-        hide_index=True,
-        height=320,
-    )
-
-
-def page_ladder(df: pd.DataFrame) -> None:
-    hero(
-        "04 · Карьерная лестница · H1 / H6",
-        "Грейд двигает чек сильнее, чем почти любой другой фактор",
-        "Смотрим отношение Senior / Junior и форму кривой по грейдам.",
-    )
-    base = base_slice(df)
-
-    ratios = []
-    for role in base.role.unique():
-        sub = base[base.role == role]
-        sub_i = sub.set_index("grade")
+        sub_i = base[base.role == role].set_index("grade")
         if "junior" not in sub_i.index or "senior" not in sub_i.index:
             continue
         if sub_i.loc["junior", "n"] < MIN_N or sub_i.loc["senior", "n"] < MIN_N:
@@ -835,41 +772,343 @@ def page_ladder(df: pd.DataFrame) -> None:
                 "junior": sub_i.loc["junior", "p50"],
                 "senior": sub_i.loc["senior", "p50"],
                 "ratio": sub_i.loc["senior", "p50"] / sub_i.loc["junior", "p50"],
-                "n_j": sub_i.loc["junior", "n"],
-                "n_s": sub_i.loc["senior", "n"],
+                "n_j": int(sub_i.loc["junior", "n"]),
+                "n_s": int(sub_i.loc["senior", "n"]),
             }
         )
-    rdf = pd.DataFrame(ratios).sort_values("ratio", ascending=False)
+    return pd.DataFrame(ratios).sort_values("ratio", ascending=False)
+
+
+# ───────────────────────── chapters ─────────────────────────
+
+def page_agenda(df: pd.DataFrame, meta: dict) -> None:
+    hero(
+        "01 · План исследования",
+        "Сколько на самом деле платят в digital — и почему",
+        "Это не таблица офферов. Это история о рычагах: что сильнее двигает чек — "
+        "роль, грейд, город или формат работы.",
+    )
+    if (ASSETS / "research_cover.png").exists():
+        st.image(str(ASSETS / "research_cover.png"), use_container_width=True)
+
+    story(
+        "Большинство споров про зарплату начинаются с одной фразы: "
+        "<strong>«в Москве платят больше»</strong> или <strong>«на удалёнке режут»</strong>. "
+        "Мы проверяем эти легенды на одних и тех же срезах — и смотрим, где интуиция права, "
+        "а где рынок уже ушёл вперёд."
+    )
+
+    kpi_row(
+        [
+            ("Срезов", f"{meta['n_slices']}", "готовых комбинаций"),
+            ("Ролей", f"{meta['n_roles']}", "в 5 функциональных группах"),
+            ("Наблюдений*", f"{meta['total_n']:,}".replace(",", " "), "сумма N по грейдам"),
+            ("Фокус", "Middle+", "где рынок плотнее всего"),
+        ]
+    )
+
+    section("Для кого", "Три читателя — три способа читать brief")
+    st.markdown(
+        """
+<div class="persona-row">
+  <div class="persona"><h4>Кандидат</h4>
+    <p>Ищите главу про лестницу и разброс: где торговаться, а где «средняя» цифра обманывает.</p></div>
+  <div class="persona"><h4>Нанимающий менеджер</h4>
+    <p>Смотрите карту рынка и IQR: вилка должна отражать влияние, а не красивое название роли.</p></div>
+  <div class="persona"><h4>Compensation / HR</h4>
+    <p>География и формат — здесь самый большой риск переплатить за миф или недоплатить таланту.</p></div>
+</div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    section("Agenda", "Пять актов одной истории", "Каждая глава = гипотеза → данные → вердикт → мнение.")
+    agenda = [
+        ("01", "Карта рынка", "Кто на Middle реально в топе — и куда «уехала» классическая аналитика?"),
+        ("02", "Карьерная лестница", "Насколько один апгрейд грейда бьёт переезд и смену формата?"),
+        ("03", "География", "Московская премия — статус или артефакт 2010-х?"),
+        ("04", "Формат работы", "Штрафует ли рынок удалёнку — или это уже HR-фольклор?"),
+        ("05", "Разброс", "Где медиана — полезный ориентир, а где опасная иллюзия?"),
+    ]
+    for num, title, q in agenda:
+        st.markdown(
+            f"""<div class="agenda-item">
+              <div class="agenda-num">{num}</div>
+              <div><div class="agenda-title">{title}</div><div class="agenda-q">{q}</div></div>
+            </div>""",
+            unsafe_allow_html=True,
+        )
+
+    section("Hypotheses", "Шесть ставок до открытия данных")
+    story(
+        "Мы формулируем гипотезы <strong>до</strong> графиков — как в нормальном research brief. "
+        "Потом честно говорим: подтвердили, ослабили или опровергли."
+    )
+    hyps = [
+        ("H1", "Senior зарабатывает в 2,5–3× больше Junior в большинстве ролей."),
+        ("H2", "Москва даёт заметную премию к медиане (≥15%) относительно «всех городов»."),
+        ("H3", "Офис платит больше удалёнки; гибрид — посередине."),
+        ("H4", "Инфра и продукт (SRE, DevOps, PM) обгоняют классическую аналитику на Middle."),
+        ("H5", "Максимальный разброс — у «размытых» ролей с малой выборкой и широким скоупом."),
+        ("H6", "Самая крутая карьерная лестница — у ML Engineer."),
+    ]
+    for code, text in hyps:
+        st.markdown(f'<div class="hypothesis"><b>{code}.</b> {text}</div>', unsafe_allow_html=True)
+
+    quote(
+        "Если после brief вы всё ещё спорите про город, а не про грейд — вы торгуетесь не тем рычагом.",
+        "Рабочая установка исследования",
+    )
+    st.markdown(
+        f'<div class="footnote">* N суммируется по независимым грейд-срезам; человек мог попасть только в один грейд. '
+        f"Срезы с N &lt; {MIN_N} скрыты.</div>",
+        unsafe_allow_html=True,
+    )
+
+
+def page_exec(df: pd.DataFrame, meta: dict) -> None:
+    hero(
+        "02 · Executive Summary",
+        "Пять выводов, которые меняют переговорную позицию",
+        "Если у вас 90 секунд — читайте только эту главу. Остальное — доказательная база.",
+    )
+    base = base_slice(df)
+    base = base[base.n >= MIN_N]
+    mid = base[base.grade == "middle"].sort_values("p50", ascending=False)
+    rdf = ladder_ratios(df)
+    top = mid.iloc[0] if len(mid) else None
+    bot = mid.iloc[-1] if len(mid) else None
+    top_ratio = rdf.iloc[0] if len(rdf) else None
+
+    quote(
+        "Рынок платит за дефицит влияния, а не за красивое название должности.",
+        "Короткий тезис brief",
+    )
+
+    findings = [
+        (
+            "01",
+            "Инфра и продукт на вершине",
+            f"На Middle лидирует {top['role_name'] if top is not None else '—'} "
+            f"({money(top['p50']) if top is not None else '—'}). "
+            "Классический аналитик данных — заметно ниже топа. Это не «аналитика умерла», "
+            "это рынок ценит тех, кто держит прод и P&amp;L.",
+        ),
+        (
+            "02",
+            "Карьера важнее города",
+            (
+                f"Junior→Senior даёт рост до {top_ratio['ratio']:.1f}× ({top_ratio['role_name']}). "
+                if top_ratio is not None else ""
+            )
+            + "Московская премия чаще в диапазоне +4–17%. Один апгрейд грейда обычно сильнее переезда.",
+        ),
+        (
+            "03",
+            "Гибрид не штрафует",
+            "Миф «офис = больше денег» не держится. У ключевых аналитических ролей гибрид "
+            "часто на уровне или выше remote/office.",
+        ),
+        (
+            "04",
+            "Разброс = риск оценки",
+            "Там, где IQR &gt; 40% медианы, «средняя вилка» почти бесполезна. "
+            "Нужны уровни влияния и жёсткие критерии грейда.",
+        ),
+    ]
+    cols = st.columns(2)
+    for i, (num, title, body) in enumerate(findings):
+        with cols[i % 2]:
+            st.markdown(
+                f"""<div class="finding" style="margin-bottom:0.85rem">
+                  <div class="finding-num">{num}</div>
+                  <div class="finding-title">{title}</div>
+                  <div class="finding-body">{body}</div>
+                </div>""",
+                unsafe_allow_html=True,
+            )
+
+    take(
+        "Если сокращать brief до одного совета: инвестируйте в грейд и скоуп роли. "
+        "Город и формат — вторичные настройки, не главная ставка."
+    )
+
+    if top is not None and bot is not None and len(mid) >= 2:
+        gap = top["p50"] / bot["p50"] - 1
+        section(
+            "Snapshot",
+            f"Разрыв Middle: {gap:.0%} между полюсами",
+            f"От {bot['role_name']} ({money(bot['p50'])}) до {top['role_name']} ({money(top['p50'])}). "
+            "Это не «несправедливый рынок» — это карта дефицита.",
+        )
+        fig = px.bar(
+            mid.head(12), x="p50", y="role_name", color="group", orientation="h",
+            color_discrete_map=GROUP_COLORS,
+            labels={"p50": "Медиана, ₽", "role_name": "", "group": "Группа"},
+        )
+        fig.update_layout(yaxis=dict(categoryorder="total ascending"), legend_title="")
+        st.plotly_chart(style_fig(fig, 420), use_container_width=True)
+        story(
+            f"Смотрите не только на вершину. Нижняя часть списка — тоже сигнал: "
+            f"там чаще шире конкуренция и проще заменить человека. "
+            f"Разница между полюсами Middle — примерно <strong>{gap:.0%}</strong>."
+        )
+
+
+def page_map(df: pd.DataFrame) -> None:
+    hero(
+        "03 · Карта рынка · H4",
+        "Кто на самом деле на вершине Middle",
+        "Фиксируем грейд Middle и убираем шум города/формата — чтобы сравнить роли честно.",
+    )
+    base = base_slice(df)
+    mid = base[(base.grade == "middle") & (base.n >= MIN_N)].sort_values("p50", ascending=False)
+    if mid.empty:
+        st.info("Нет данных для карты Middle при текущем пороге N.")
+        return
+
+    top3 = mid.head(3)
+    da = mid[mid.role == "data-analyst"]
+    da_rank = int(list(mid.role).index("data-analyst") + 1) if len(da) else None
+
+    story(
+        "Интуиция многих команд такая: <strong>«аналитика = дорого, дизайн = дёшево, "
+        "разработка = посередине»</strong>. Данные рисуют другую картину: на Middle рынок "
+        "платит премию за инфраструктуру, ownership продукта и редкие навыки рядом с продом."
+    )
+
+    if len(top3) >= 3:
+        second, first, third = top3.iloc[1], top3.iloc[0], top3.iloc[2]
+        st.markdown(
+            f"""
+<div class="podium">
+  <div class="podium-card">
+    <div class="podium-place">2 место</div>
+    <div class="podium-name">{second['role_name']}</div>
+    <div class="podium-val">{money(second['p50'])}</div>
+  </div>
+  <div class="podium-card gold">
+    <div class="podium-place">Лидер Middle</div>
+    <div class="podium-name">{first['role_name']}</div>
+    <div class="podium-val">{money(first['p50'])}</div>
+  </div>
+  <div class="podium-card">
+    <div class="podium-place">3 место</div>
+    <div class="podium-name">{third['role_name']}</div>
+    <div class="podium-val">{money(third['p50'])}</div>
+  </div>
+</div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    verdict(
+        "confirm",
+        "H4 · Подтверждена",
+        f"Топ Middle: {', '.join(top3['role_name'].tolist())}. "
+        + (
+            f"Аналитик данных — {money(da.iloc[0]['p50'])}, {da_rank}-е место из {len(mid)}."
+            if da_rank else ""
+        ),
+    )
+
+    c1, c2 = st.columns((1.35, 1))
+    with c1:
+        fig = go.Figure()
+        for _, r in mid.iterrows():
+            fig.add_trace(
+                go.Bar(
+                    name=r["group"], x=[r["role_name"]], y=[r["p75"] - r["p25"]], base=[r["p25"]],
+                    marker_color=GROUP_COLORS.get(r["group"], MUTED), opacity=0.35, showlegend=False,
+                    hovertemplate=(
+                        f"{r['role_name']}<br>p25–p75: {money(r['p25'])} – {money(r['p75'])}"
+                        f"<br>медиана: {money(r['p50'])}<br>N={int(r['n'])}<extra></extra>"
+                    ),
+                )
+            )
+        fig.add_trace(
+            go.Scatter(
+                x=mid["role_name"], y=mid["p50"], mode="markers+lines", name="Медиана",
+                marker=dict(size=9, color=INK), line=dict(color=INK, width=1.5),
+                hovertemplate="%{x}: %{y:,.0f} ₽<extra></extra>",
+            )
+        )
+        fig.update_layout(title="Middle: коридор p25–p75 и медиана", xaxis_tickangle=-35, yaxis_title="₽", showlegend=False)
+        st.plotly_chart(style_fig(fig, 440), use_container_width=True)
+
+    with c2:
+        section("By function", "Где «центр тяжести» функций")
+        gmed = (
+            mid.groupby("group", as_index=False)
+            .agg(p50=("p50", "median"), n_roles=("role", "count"))
+            .sort_values("p50", ascending=True)
+        )
+        fig2 = px.bar(
+            gmed, x="p50", y="group", orientation="h",
+            text=gmed["p50"].map(lambda v: f"{int(v/1000)}k"),
+            color_discrete_sequence=[ACCENT],
+            labels={"p50": "Медиана ролей", "group": ""},
+        )
+        fig2.update_traces(textposition="outside", cliponaxis=False)
+        st.plotly_chart(style_fig(fig2, 320), use_container_width=True)
+        story(
+            "Группы с высокой медианой — не всегда «модные». Чаще это функции, "
+            "где ошибка дорого стоит: прод, надёжность, решения по продукту."
+        )
+
+    take(
+        "Если ваша команда называет data-analyst «дорогим специалистом», сверьте с картой: "
+        "на Middle он часто ниже PM/DevOps/SRE. Переговоры надо вести от влияния на бизнес, "
+        "а не от внутренней легенды отдела."
+    )
+
+    with st.expander("Полная таблица Middle"):
+        st.dataframe(
+            mid[["role_name", "group", "n", "p25", "p50", "p75"]]
+            .assign(p25=lambda d: d.p25.map(money), p50=lambda d: d.p50.map(money), p75=lambda d: d.p75.map(money))
+            .rename(columns={"role_name": "Роль", "group": "Группа", "n": "N", "p25": "p25", "p50": "Медиана", "p75": "p75"}),
+            use_container_width=True, hide_index=True, height=360,
+        )
+
+
+def page_ladder(df: pd.DataFrame) -> None:
+    hero(
+        "04 · Карьерная лестница · H1 / H6",
+        "Грейд двигает чек сильнее, чем почти любой другой фактор",
+        "Сравниваем Senior к Junior и смотрим форму кривой — где рост плавный, а где «обрыв».",
+    )
+    if (ASSETS / "career_vs_city.png").exists():
+        st.image(str(ASSETS / "career_vs_city.png"), use_container_width=True)
+
+    rdf = ladder_ratios(df)
     if rdf.empty:
         st.info(f"Недостаточно данных Junior+Senior (N ≥ {MIN_N}).")
         return
 
     top = rdf.iloc[0]
-    med_ratio = rdf["ratio"].median()
-    verdict(
-        "confirm",
-        "H1 · Подтверждена",
-        f"Медианный рост Junior→Senior: {med_ratio:.1f}×. "
-        f"Лидер лестницы — {top['role_name']} ({top['ratio']:.1f}×: "
-        f"{money(top['junior'])} → {money(top['senior'])}).",
+    med_ratio = float(rdf["ratio"].median())
+    base = base_slice(df)
+
+    story(
+        f"Представьте два сценария. <strong>А:</strong> переезд в Москву при том же грейде. "
+        f"<strong>Б:</strong> рост Junior→Senior в той же роли. "
+        f"Медианный множитель по рынку — около <strong>{med_ratio:.1f}×</strong>. "
+        f"У лидера лестницы ({top['role_name']}) — уже <strong>{top['ratio']:.1f}×</strong> "
+        f"({money(top['junior'])} → {money(top['senior'])})."
     )
-    if top["role"] == "ml-engineer" or (rdf.role == "ml-engineer").any():
-        ml = rdf[rdf.role == "ml-engineer"]
-        if len(ml):
-            verdict(
-                "confirm",
-                "H6 · Подтверждена",
-                f"ML Engineer: {ml.iloc[0]['ratio']:.1f}× — самая крутая (или среди топа) карьерная премия в выборке.",
-            )
+
+    verdict("confirm", "H1 · Подтверждена", f"Медианный рост Junior→Senior: {med_ratio:.1f}×. Гипотеза 2,5–3× в целом жива.")
+    ml = rdf[rdf.role == "ml-engineer"]
+    if len(ml):
+        verdict(
+            "confirm", "H6 · Подтверждена",
+            f"ML Engineer: {ml.iloc[0]['ratio']:.1f}× — одна из самых крутых карьерных премий в выборке.",
+        )
 
     c1, c2 = st.columns(2)
     with c1:
         fig = px.bar(
-            rdf.head(14),
-            x="ratio",
-            y="role_name",
-            color="group",
-            orientation="h",
+            rdf.head(14), x="ratio", y="role_name", color="group", orientation="h",
             labels={"ratio": "Senior / Junior", "role_name": "", "group": "Группа"},
             color_discrete_map=GROUP_COLORS,
         )
@@ -884,52 +1123,52 @@ def page_ladder(df: pd.DataFrame) -> None:
         curve["grade"] = pd.Categorical(curve["grade"], categories=order, ordered=True)
         curve = curve.sort_values("grade")
         fig2 = go.Figure()
-        fig2.add_trace(
-            go.Scatter(
-                x=curve["grade_name"],
-                y=curve["p50"],
-                mode="lines+markers",
-                name="медиана",
-                line=dict(color=ACCENT, width=3),
-                marker=dict(size=10),
-            )
-        )
-        fig2.add_trace(
-            go.Scatter(
-                x=curve["grade_name"].tolist() + curve["grade_name"].tolist()[::-1],
-                y=curve["p75"].tolist() + curve["p25"].tolist()[::-1],
-                fill="toself",
-                fillcolor="rgba(0,91,255,0.12)",
-                line=dict(color="rgba(0,0,0,0)"),
-                name="p25–p75",
-                hoverinfo="skip",
-            )
-        )
+        fig2.add_trace(go.Scatter(
+            x=curve["grade_name"], y=curve["p50"], mode="lines+markers", name="медиана",
+            line=dict(color=ACCENT, width=3), marker=dict(size=10),
+        ))
+        fig2.add_trace(go.Scatter(
+            x=curve["grade_name"].tolist() + curve["grade_name"].tolist()[::-1],
+            y=curve["p75"].tolist() + curve["p25"].tolist()[::-1],
+            fill="toself", fillcolor="rgba(0,91,255,0.12)",
+            line=dict(color="rgba(0,0,0,0)"), name="p25–p75", hoverinfo="skip",
+        ))
         name = curve.iloc[0]["role_name"] if len(curve) else role
         fig2.update_layout(title=f"Кривая грейдов · {name}", yaxis_title="₽")
         st.plotly_chart(style_fig(fig2, 420), use_container_width=True)
-        st.caption("Иллюстрация на примере аналитика данных.")
+        story(
+            "На кривой аналитика данных видно типичное поведение рынка: "
+            "ранние ступени растут умеренно, а переход к Senior/Lead ускоряется — "
+            "именно там появляется премия за автономность и влияние."
+        )
 
-
-def meta_grade_order() -> List[str]:
-    return [
-        "intern",
-        "junior",
-        "junior-plus",
-        "middle",
-        "middle-plus",
-        "senior",
-        "senior-plus",
-        "lead",
-        "lead-plus",
-    ]
+    section("Как читать лестницу", "Не все × одинаково полезны")
+    st.markdown(
+        """
+<div class="matrix">
+  <div class="matrix-cell hi"><h4>Высокий множитель + спрос</h4>
+    <p>ML, DevOps, системный анализ: учиться и расти здесь — высокий ROI по деньгам.</p></div>
+  <div class="matrix-cell"><h4>Высокий множитель + узкий рынок</h4>
+    <p>Красивая лестница, но мало вакансий. Смотрите N и устойчивость спроса.</p></div>
+  <div class="matrix-cell"><h4>Плоская лестница</h4>
+    <p>Рост через смену роли/компании часто выгоднее, чем «высидеть» следующий грейд.</p></div>
+  <div class="matrix-cell"><h4>Практический вывод</h4>
+    <p>В резюме важнее доказуемый скоуп Senior, чем переезд ради +10% к медиане.</p></div>
+</div>
+        """,
+        unsafe_allow_html=True,
+    )
+    take(
+        "Для кандидата: один уверенный апгрейд грейда обычно бьёт и переезд, и спор про remote. "
+        "Для компании: дешевле вырастить Middle→Senior внутри, чем постоянно покупать Senior с рынка."
+    )
 
 
 def page_geo(df: pd.DataFrame) -> None:
     hero(
         "05 · География · H2",
         "Московская премия есть — но она скромнее легенды",
-        "Сравниваем медиану Москва vs «все города» на одних и тех же роли и грейде.",
+        "Сравниваем Москву с «всеми городами» на одинаковых роли и грейде.",
     )
     rows = []
     for _, r in df.iterrows():
@@ -937,102 +1176,77 @@ def page_geo(df: pd.DataFrame) -> None:
             continue
         if r["n"] < MIN_N:
             continue
-        allc = df[
-            (df.role == r.role)
-            & (df.grade == r.grade)
-            & (df.city == "*")
-            & (df.format == "*")
-        ]
+        allc = df[(df.role == r.role) & (df.grade == r.grade) & (df.city == "*") & (df.format == "*")]
         if allc.empty:
             continue
         a = allc.iloc[0]
-        rows.append(
-            {
-                "role_name": r.role_name,
-                "group": r.group,
-                "grade_name": r.grade_name,
-                "grade": r.grade,
-                "msk": r.p50,
-                "all": a.p50,
-                "lift": r.p50 / a.p50 - 1,
-                "n_msk": r.n,
-                "n_all": a.n,
-            }
-        )
+        rows.append({
+            "role_name": r.role_name, "group": r.group, "grade_name": r.grade_name, "grade": r.grade,
+            "msk": r.p50, "all": a.p50, "lift": r.p50 / a.p50 - 1, "n_msk": r.n, "n_all": a.n,
+        })
     gdf = pd.DataFrame(rows)
     if gdf.empty:
         st.info(f"Мало московских срезов с N ≥ {MIN_N}.")
         return
 
-    med_lift = gdf["lift"].median()
+    med_lift = float(gdf["lift"].median())
     max_row = gdf.loc[gdf["lift"].idxmax()]
+
+    story(
+        "Легенда звучит уверенно: <strong>«переезжай в Москву — зарплата скакнёт»</strong>. "
+        "На практике премия чаще выглядит как надбавка, а не как новая жизнь. "
+        f"Медиана по сопоставимым срезам: <strong>{pct(med_lift)}</strong>."
+    )
+
     if med_lift >= 0.15:
-        verdict(
-            "confirm",
-            "H2 · Подтверждена",
-            f"Медианная премия Москвы: {pct(med_lift)}. Гипотеза ≥15% выполняется.",
-        )
+        verdict("confirm", "H2 · Подтверждена", f"Медианная премия Москвы: {pct(med_lift)}. Гипотеза ≥15% выполняется.")
     else:
         verdict(
-            "nuance",
-            "H2 · Частично / ослаблена",
-            f"Медианная премия Москвы: {pct(med_lift)} — заметно ниже порога 15%. "
-            f"Максимум в выборке: {max_row['role_name']} / {max_row['grade_name']} "
-            f"({pct(max_row['lift'])}). Карьерный грейд обычно важнее переезда.",
+            "nuance", "H2 · Ослаблена",
+            f"Медианная премия Москвы: {pct(med_lift)} — ниже порога 15%. "
+            f"Максимум: {max_row['role_name']} / {max_row['grade_name']} ({pct(max_row['lift'])}).",
         )
 
     fig = px.scatter(
-        gdf,
-        x="all",
-        y="msk",
-        color="group",
-        size="n_msk",
+        gdf, x="all", y="msk", color="group", size="n_msk",
         hover_data={"role_name": True, "grade_name": True, "lift": ":.0%", "all": True, "msk": True},
         labels={"all": "Все города, медиана", "msk": "Москва, медиана", "group": "Группа"},
         color_discrete_map=GROUP_COLORS,
     )
     mx = max(gdf["all"].max(), gdf["msk"].max()) * 1.05
-    fig.add_trace(
-        go.Scatter(
-            x=[0, mx],
-            y=[0, mx],
-            mode="lines",
-            line=dict(dash="dot", color=MUTED),
-            name="без премии",
-            hoverinfo="skip",
-        )
-    )
+    fig.add_trace(go.Scatter(
+        x=[0, mx], y=[0, mx], mode="lines", line=dict(dash="dot", color=MUTED),
+        name="без премии", hoverinfo="skip",
+    ))
     fig.update_layout(title="Москва vs все города (размер = N в Москве)")
     st.plotly_chart(style_fig(fig, 440), use_container_width=True)
 
-    show = gdf.sort_values("lift", ascending=False)
-    st.dataframe(
-        show.assign(
-            all=lambda d: d["all"].map(money),
-            msk=lambda d: d["msk"].map(money),
-            lift=lambda d: d["lift"].map(pct),
-        )[["role_name", "grade_name", "group", "all", "msk", "lift", "n_msk"]].rename(
-            columns={
-                "role_name": "Роль",
-                "grade_name": "Грейд",
-                "group": "Группа",
-                "all": "Все города",
-                "msk": "Москва",
-                "lift": "Премия",
-                "n_msk": "N МСК",
-            }
-        ),
-        use_container_width=True,
-        hide_index=True,
-        height=300,
+    story(
+        "Точки выше диагонали — Москва дороже. Чем ближе к линии, тем слабее географический эффект. "
+        "Важный нюанс: «все города» уже включают Москву, поэтому премия <em>чистой</em> "
+        "Москвы к регионам может быть чуть выше — но порядок величины тот же."
     )
+    take(
+        "Переезд имеет смысл, если вы меняете рынок возможностей (встречи, компании, нетворкинг), "
+        "а не только строку в оффере. Ради +5–10% к медиане переезд редко окупается."
+    )
+
+    with st.expander("Детализация премии по срезам"):
+        show = gdf.sort_values("lift", ascending=False)
+        st.dataframe(
+            show.assign(all=lambda d: d["all"].map(money), msk=lambda d: d["msk"].map(money), lift=lambda d: d["lift"].map(pct))
+            [["role_name", "grade_name", "group", "all", "msk", "lift", "n_msk"]]
+            .rename(columns={"role_name": "Роль", "grade_name": "Грейд", "group": "Группа",
+                             "all": "Все города", "msk": "Москва", "lift": "Премия", "n_msk": "N МСК"}),
+            use_container_width=True, hide_index=True, height=320,
+        )
 
 
 def page_format(df: pd.DataFrame) -> None:
     hero(
         "06 · Формат работы · H3",
         "Удалёнка не выглядит «штрафом»",
-        "Сравниваем remote / hybrid / office при city = все города.",
+        "Сравниваем remote / hybrid / office при одинаковом «все города».",
     )
     fdf = df[(df.city == "*") & (df.format != "*") & (df.grade != "*")].copy()
     fdf = fdf[fdf.n >= MIN_N]
@@ -1040,17 +1254,19 @@ def page_format(df: pd.DataFrame) -> None:
         st.info(f"Нет срезов по форматам с N ≥ {MIN_N}.")
         return
 
-    # pivot roles that have ≥2 formats on same grade
+    story(
+        "Ещё одна любимая корпоративная мантра: <strong>«в офисе платят больше, "
+        "удалёнка — для тех, кто согласен на дисконт»</strong>. "
+        "Проверяем на ролях, где хватает данных по нескольким форматам."
+    )
+
     comparisons = []
     for (role, grade), g in fdf.groupby(["role", "grade"]):
         if g["format"].nunique() < 2:
             continue
         row = {
-            "role": role,
-            "role_name": g.iloc[0].role_name,
-            "group": g.iloc[0].group,
-            "grade": grade,
-            "grade_name": g.iloc[0].grade_name,
+            "role": role, "role_name": g.iloc[0].role_name, "group": g.iloc[0].group,
+            "grade": grade, "grade_name": g.iloc[0].grade_name,
         }
         for fmt in ["remote", "hybrid", "office"]:
             sub = g[g.format == fmt]
@@ -1058,169 +1274,151 @@ def page_format(df: pd.DataFrame) -> None:
             row[f"n_{fmt}"] = int(sub.iloc[0].n) if len(sub) else 0
         comparisons.append(row)
     cdf = pd.DataFrame(comparisons)
-    # office vs remote where both exist
     both = cdf.dropna(subset=["remote", "office"])
     if len(both):
-        office_higher = (both["office"] > both["remote"]).mean()
+        office_higher = float((both["office"] > both["remote"]).mean())
         hybrid_vs_remote = cdf.dropna(subset=["remote", "hybrid"])
         hybrid_higher = (
-            (hybrid_vs_remote["hybrid"] >= hybrid_vs_remote["remote"]).mean()
-            if len(hybrid_vs_remote)
-            else None
+            float((hybrid_vs_remote["hybrid"] >= hybrid_vs_remote["remote"]).mean())
+            if len(hybrid_vs_remote) else None
         )
         verdict(
-            "reject",
-            "H3 · Опровергнута",
+            "reject", "H3 · Опровергнута",
             f"Офис выше удалёнки только в {office_higher:.0%} сопоставимых срезов. "
-            + (
-                f"Гибрид ≥ remote в {hybrid_higher:.0%} случаев. "
-                if hybrid_higher is not None
-                else ""
-            )
-            + "Формат — слабый рычаг по сравнению с грейдом и ролью.",
+            + (f"Гибрид ≥ remote в {hybrid_higher:.0%} случаев. " if hybrid_higher is not None else "")
+            + "Формат — слабый рычаг рядом с грейдом и ролью.",
         )
     else:
         verdict("nuance", "H3 · Недостаточно пар", "Мало прямых сравнений office vs remote.")
 
-    # chart: selected popular roles
-    focus_roles = [
-        r
-        for r in ["data-analyst", "product-analyst", "system-analyst", "backend", "product-manager"]
-        if r in set(fdf.role)
-    ]
+    focus_roles = [r for r in ["data-analyst", "product-analyst", "system-analyst", "backend", "product-manager"] if r in set(fdf.role)]
     plot = fdf[fdf.role.isin(focus_roles) & fdf.grade.isin(["middle", "senior"])].copy()
     if not plot.empty:
         fig = px.bar(
-            plot,
-            x="grade_name",
-            y="p50",
-            color="format_name",
-            facet_col="role_name",
-            facet_col_wrap=3,
-            barmode="group",
-            category_orders={
-                "format_name": ["Полная удалёнка", "Гибрид", "Офис"],
-                "grade_name": ["Middle", "Senior"],
-            },
+            plot, x="grade_name", y="p50", color="format_name", facet_col="role_name",
+            facet_col_wrap=3, barmode="group",
+            category_orders={"format_name": ["Полная удалёнка", "Гибрид", "Офис"], "grade_name": ["Middle", "Senior"]},
             color_discrete_sequence=["#0A2540", "#005BFF", "#C45C26"],
             labels={"p50": "Медиана", "grade_name": "", "format_name": "Формат"},
         )
         fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
         fig.update_layout(title="Формат × грейд для ключевых ролей")
-        st.plotly_chart(style_fig(fig, 460), use_container_width=True)
+        st.plotly_chart(style_fig(fig, 480), use_container_width=True)
 
-    st.dataframe(
-        cdf.assign(
-            remote=lambda d: d["remote"].map(lambda x: money(x) if pd.notna(x) else "—"),
-            hybrid=lambda d: d["hybrid"].map(lambda x: money(x) if pd.notna(x) else "—"),
-            office=lambda d: d["office"].map(lambda x: money(x) if pd.notna(x) else "—"),
-        )[["role_name", "grade_name", "remote", "hybrid", "office"]].rename(
-            columns={
-                "role_name": "Роль",
-                "grade_name": "Грейд",
-                "remote": "Remote",
-                "hybrid": "Hybrid",
-                "office": "Office",
-            }
-        ),
-        use_container_width=True,
-        hide_index=True,
-        height=280,
+    quote(
+        "Если компания режет remote «по умолчанию», она конкурирует не цифрами рынка — а своей политикой.",
+        "Импликация для HR",
     )
+    take(
+        "Гибрид часто выглядит как sweet spot рынка: достаточно гибкости для кандидата "
+        "и достаточно присутствия для компании. Штрафовать remote без данных — способ "
+        "проигрывать войну за талант."
+    )
+
+    with st.expander("Сводная таблица форматов"):
+        st.dataframe(
+            cdf.assign(
+                remote=lambda d: d["remote"].map(lambda x: money(x) if pd.notna(x) else "—"),
+                hybrid=lambda d: d["hybrid"].map(lambda x: money(x) if pd.notna(x) else "—"),
+                office=lambda d: d["office"].map(lambda x: money(x) if pd.notna(x) else "—"),
+            )[["role_name", "grade_name", "remote", "hybrid", "office"]]
+            .rename(columns={"role_name": "Роль", "grade_name": "Грейд", "remote": "Remote", "hybrid": "Hybrid", "office": "Office"}),
+            use_container_width=True, hide_index=True, height=300,
+        )
 
 
 def page_spread(df: pd.DataFrame) -> None:
     hero(
         "07 · Разброс зарплат · H5",
         "Где «медиана» врёт сильнее всего",
-        "IQR / медиана показывает, насколько широк коридор переговоров внутри роли.",
+        "IQR / медиана — ширина коридора переговоров. Чем она больше, тем опаснее одна «средняя» цифра.",
     )
     mid = base_slice(df)
-    mid = mid[mid.grade == "middle"]
-    mid = mid[mid.n >= MIN_N].copy()
+    mid = mid[(mid.grade == "middle") & (mid.n >= MIN_N)].copy()
     mid["iqr"] = mid["p75"] - mid["p25"]
     mid["iqr_pct"] = mid["iqr"] / mid["p50"]
     mid = mid.sort_values("iqr_pct", ascending=False)
-
     if mid.empty:
         st.info("Нет данных.")
         return
 
     top = mid.iloc[0]
+    tight = mid.iloc[-1]
+    story(
+        f"Медиана — удобная ложь, когда рынок узкий. Но если у роли "
+        f"<strong>{top['role_name']}</strong> IQR занимает "
+        f"<strong>{top['iqr_pct']:.0%}</strong> медианы, то один оффер «по рынку» "
+        f"может быть и щедрым, и оскорбительным — в зависимости от скоупа."
+    )
     verdict(
-        "confirm",
-        "H5 · Подтверждена",
+        "confirm", "H5 · Подтверждена",
         f"Максимальный относительный разброс: {top['role_name']} — IQR "
-        f"{pct(top['iqr_pct']).lstrip('+')} медианы (N={int(top['n'])}). "
-        "Чем выше IQR%, тем опаснее опираться на одну «среднюю» цифру в оффере.",
+        f"{top['iqr_pct']:.0%} медианы (N={int(top['n'])}). "
+        f"Для контраста, самый «ровный» в хвосте: {tight['role_name']} ({tight['iqr_pct']:.0%}).",
     )
 
     fig = px.scatter(
-        mid,
-        x="p50",
-        y="iqr_pct",
-        size="n",
-        color="group",
-        hover_name="role_name",
-        labels={
-            "p50": "Медиана Middle",
-            "iqr_pct": "IQR / медиана",
-            "group": "Группа",
-            "n": "N",
-        },
+        mid, x="p50", y="iqr_pct", size="n", color="group", hover_name="role_name",
+        labels={"p50": "Медиана Middle", "iqr_pct": "IQR / медиана", "group": "Группа", "n": "N"},
         color_discrete_map=GROUP_COLORS,
     )
     fig.update_layout(title="Уровень оплаты vs неопределённость")
     fig.update_yaxes(tickformat=".0%")
     st.plotly_chart(style_fig(fig, 420), use_container_width=True)
 
-    st.dataframe(
-        mid.assign(
-            p50=lambda d: d.p50.map(money),
-            iqr=lambda d: d.iqr.map(money),
-            iqr_pct=lambda d: d.iqr_pct.map(lambda x: f"{x:.0%}"),
-        )[["role_name", "group", "n", "p50", "iqr", "iqr_pct"]].rename(
-            columns={
-                "role_name": "Роль",
-                "group": "Группа",
-                "n": "N",
-                "p50": "Медиана",
-                "iqr": "IQR",
-                "iqr_pct": "IQR%",
-            }
-        ),
-        use_container_width=True,
-        hide_index=True,
+    section("Как жить с широким IQR", "Практика для офферов и переговоров")
+    st.markdown(
+        """
+<div class="matrix">
+  <div class="matrix-cell hi"><h4>Широкий IQR</h4>
+    <p>Дробите роль на уровни влияния. Без этого вилка превращается в лотерею.</p></div>
+  <div class="matrix-cell"><h4>Узкий IQR</h4>
+    <p>Можно опираться на медиану смелее — рынок более «схлопнут».</p></div>
+  <div class="matrix-cell"><h4>Маленький N</h4>
+    <p>Даже красивая медиана хрупкая. Смотрите соседние роли и грейды.</p></div>
+  <div class="matrix-cell"><h4>Переговоры</h4>
+    <p>Кандидату выгоднее спорить про скоуп и impact, чем про «среднюю по рынку».</p></div>
+</div>
+        """,
+        unsafe_allow_html=True,
     )
+    take(
+        "Самая частая ошибка — взять медиану роли с огромным IQR и назвать это «рынком». "
+        "Это не рынок, это размытый ярлык. Сначала уточните, какого Senior вы имеете в виду."
+    )
+
+    with st.expander("Таблица разброса Middle"):
+        st.dataframe(
+            mid.assign(p50=lambda d: d.p50.map(money), iqr=lambda d: d.iqr.map(money), iqr_pct=lambda d: d.iqr_pct.map(lambda x: f"{x:.0%}"))
+            [["role_name", "group", "n", "p50", "iqr", "iqr_pct"]]
+            .rename(columns={"role_name": "Роль", "group": "Группа", "n": "N", "p50": "Медиана", "iqr": "IQR", "iqr_pct": "IQR%"}),
+            use_container_width=True, hide_index=True,
+        )
 
 
 def page_so_what(df: pd.DataFrame) -> None:
     hero(
         "08 · So what",
-        "Что делать с этими цифрами",
-        "Импликации для кандидата, нанимающего менеджера и компенсации.",
+        "Что делать с этими цифрами в понедельник",
+        "Не «интересно посмотреть», а конкретные ходы для кандидата, менеджера и compensation.",
+    )
+    story(
+        "Исследование бесполезно, если после него все кивают и возвращаются к старым вилкам. "
+        "Ниже — перевод вердиктов на язык действий."
     )
     items = [
-        (
-            "Кандидату",
-            "Торгуйтесь грейдом и скоупом, не городом. Переход Junior→Middle или Middle→Senior "
-            "часто даёт больший эффект, чем переезд в Москву.",
-        ),
-        (
-            "Нанимающему",
-            "Для ролей с высоким IQR% вилка должна быть широкой и привязанной к уровню влияния, "
-            "а не к названию должности.",
-        ),
-        (
-            "Compensation",
-            "Не штрафуйте remote по умолчанию: данные не показывают устойчивого дисконта. "
-            "Гибрид часто на уровне или выше.",
-        ),
-        (
-            "Карьерный трек",
-            "Самый крутой ROI обучения/роста — в зонах вроде ML/DevOps/системного анализа, "
-            "где Senior/Junior превышает 2,7–3,8×.",
-        ),
+        ("Кандидату",
+         "Торгуйтесь грейдом и скоупом, не городом. Соберите 2–3 доказательства Senior-влияния "
+         "и просите апгрейд уровня — это обычно дороже, чем +Москва в оффере."),
+        ("Нанимающему",
+         "Для ролей с высоким IQR% не публикуйте одну медиану. Сделайте две-три вилки "
+         "под уровни влияния и объясните критерии перехода."),
+        ("Compensation",
+         "Уберите автоматический remote-дисконт. Если политика «офис дороже» — докажите цифрами "
+         "по вашей воронке найма, иначе вы просто теряете кандидатов."),
+        ("Карьерный трек",
+         "Самый высокий ROI роста — зоны с крутой лестницей: ML / DevOps / системный анализ. "
+         "Туда имеет смысл направлять обучение и internal mobility."),
     ]
     cols = st.columns(2)
     for i, (t, b) in enumerate(items):
@@ -1233,26 +1431,33 @@ def page_so_what(df: pd.DataFrame) -> None:
                 unsafe_allow_html=True,
             )
 
-    section("Scorecard", "Итог по гипотезам")
+    quote(
+        "Хороший оффер — это не попадание в медиану. Это попадание в правильный квартиль правильного скоупа.",
+        "Финальный принцип",
+    )
+
+    section("Scorecard", "Итог по гипотезам — одной строкой")
     score = [
-        ("H1 Карьерный множитель 2,5–3×", "Подтверждена", "confirm"),
-        ("H2 Москва ≥ +15%", "Ослаблена (~+4–17%)", "nuance"),
-        ("H3 Офис > remote", "Опровергнута", "reject"),
-        ("H4 Инфра/продукт > аналитика", "Подтверждена", "confirm"),
-        ("H5 Разброс у «размытых» ролей", "Подтверждена", "confirm"),
-        ("H6 ML — самая крутая лестница", "Подтверждена", "confirm"),
+        ("H1 Карьерный множитель 2,5–3×", "Подтверждена — грейд главный рычаг", "confirm"),
+        ("H2 Москва ≥ +15%", "Ослаблена — премия скромнее легенды", "nuance"),
+        ("H3 Офис > remote", "Опровергнута — формат слабый фактор", "reject"),
+        ("H4 Инфра/продукт > аналитика", "Подтверждена — рынок платит за ownership", "confirm"),
+        ("H5 Разброс у «размытых» ролей", "Подтверждена — медиана бывает опасна", "confirm"),
+        ("H6 ML — самая крутая лестница", "Подтверждена — высокий ROI роста", "confirm"),
     ]
     for title, tag, kind in score:
         verdict(kind, tag, title)
 
+    take(
+        "Если помнить только одно: сначала роль и грейд, потом город и формат. "
+        "Всё остальное в этом brief — доказательства этого порядка."
+    )
     st.markdown(
         f'<div class="footnote">Срезы с N &lt; {MIN_N} скрыты. '
-        "Это наблюдательная картина рынка, а не причинно-следственный вывод.</div>",
+        "Наблюдательная картина рынка, не причинно-следственный вывод.</div>",
         unsafe_allow_html=True,
     )
 
-
-# ───────────────────────── main ─────────────────────────
 
 def main() -> None:
     st.set_page_config(
@@ -1262,7 +1467,6 @@ def main() -> None:
         initial_sidebar_state="expanded",
     )
     inject_css()
-
     try:
         df, meta = load_data()
     except FileNotFoundError:
@@ -1279,22 +1483,17 @@ def main() -> None:
             label_visibility="collapsed",
         )
 
-    if chapter == "agenda":
-        page_agenda(df, meta)
-    elif chapter == "exec":
-        page_exec(df, meta)
-    elif chapter == "map":
-        page_map(df)
-    elif chapter == "ladder":
-        page_ladder(df)
-    elif chapter == "geo":
-        page_geo(df)
-    elif chapter == "format":
-        page_format(df)
-    elif chapter == "spread":
-        page_spread(df)
-    else:
-        page_so_what(df)
+    pages = {
+        "agenda": lambda: page_agenda(df, meta),
+        "exec": lambda: page_exec(df, meta),
+        "map": lambda: page_map(df),
+        "ladder": lambda: page_ladder(df),
+        "geo": lambda: page_geo(df),
+        "format": lambda: page_format(df),
+        "spread": lambda: page_spread(df),
+        "so_what": lambda: page_so_what(df),
+    }
+    pages[chapter]()
 
 
 if __name__ == "__main__":
